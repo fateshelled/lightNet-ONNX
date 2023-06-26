@@ -124,10 +124,11 @@ class EmptyModule(nn.Module):
 
 # support route shortcut and reorg
 class Darknet(nn.Module):
-    def __init__(self, cfgfile, inference=False):
+    def __init__(self, cfgfile, inference=False, argmax=True):
         super(Darknet, self).__init__()
         self.inference = inference
         self.training = not self.inference
+        self.argmax = argmax
 
         self.blocks = parse_cfg(cfgfile)
         self.width = int(self.blocks[0]['width'])
@@ -161,8 +162,10 @@ class Darknet(nn.Module):
                 layer = self.models[ind]
                 x = layer(x)
                 outputs[ind] = x
-                out_segment.append(x)
-                out_segment.append(torch.argmax(x, dim=1))
+                if self.argmax:
+                    out_segment.append(torch.argmax(x, dim=1))
+                else:
+                    out_segment.append(x)
 
             elif block_type in ['convolutional', 'maxpool', 'reorg', 'upsample', 'avgpool', 'connected']:
                 layer = self.models[ind]

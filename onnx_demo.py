@@ -65,9 +65,11 @@ def main(model_path: str, video_path: str, conf_thresh: float, nms_thresh: float
         t_vis = time.perf_counter()
         # segm = outputs[2][0]  # 1x20x480x640 -> 20x480x640
         # seg_img = np.argmax(segm, axis=0)  # 20x480x640 -> 480x640
-        seg_img = outputs[3][0]  # 480x640
+
+        seg_img = outputs[2][0]  # 480x640
         colored_seg = colorize(seg_img)
         overlayed = overlay(img, colored_seg)
+
         drawn = plot_boxes_cv2(img, boxes[0], class_names=CLASS_NAMES)
         dt_vis = time.perf_counter() - t_vis
 
@@ -85,7 +87,8 @@ def main(model_path: str, video_path: str, conf_thresh: float, nms_thresh: float
 
 
 if __name__ == "__main__":
-    model_path = "lightNet-BDD100K-det-semaseg-1280x960.onnx"
+    model_path = "../lightNet-BDD100K-det-semaseg-1280x960.onnx"
+    # model_path = "../lightNet-BDD100K-chPruning-det-semaseg-1280x960.onnx"
     video_path = "/dev/video0"
     # video_path = "MOT16-14-raw.webm"
     conf_thresh = 0.45

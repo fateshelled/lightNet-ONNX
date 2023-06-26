@@ -193,10 +193,12 @@ def yolo_forward_dynamic(output, conf_thresh, num_classes, anchors, num_anchors,
 
     # Apply sigmoid(), exp() and softmax() to slices
     #
-    bxy = torch.sigmoid(bxy) * scale_x_y - 0.5 * (scale_x_y - 1)
-    bwh = torch.exp(bwh)
-    det_confs = torch.sigmoid(det_confs)
-    cls_confs = torch.sigmoid(cls_confs)
+    # bxy = torch.sigmoid(bxy) * scale_x_y - 0.5 * (scale_x_y - 1.0)
+    # bwh = torch.exp(bwh)
+    # det_confs = torch.sigmoid(det_confs)
+    # cls_confs = torch.sigmoid(cls_confs)
+    bxy = bxy * scale_x_y - 0.5 * (scale_x_y - 1.0)
+    bwh = bwh * bwh * 4
 
     # Prepare C-x, C-y, P-w, P-h (None of them are torch related)
     grid_x = np.expand_dims(np.expand_dims(np.expand_dims(np.linspace(0, output.size(3) - 1, output.size(3)), axis=0).repeat(output.size(2), 0), axis=0), axis=0)
