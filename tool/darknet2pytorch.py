@@ -243,9 +243,15 @@ class Darknet(nn.Module):
                 print('unknown type %s' % (block_type))
 
         if self.training:
-            return out_boxes, out_segment
+            if len(out_segment) > 0:
+                return out_boxes, out_segment
+            else:
+                return out_boxes
         else:
-            return get_region_boxes(out_boxes), out_segment
+            if len(out_segment) > 0:
+                return get_region_boxes(out_boxes), out_segment
+            else:
+                return get_region_boxes(out_boxes)
 
     def print_network(self):
         print_cfg(self.blocks)

@@ -3,27 +3,39 @@ import torch
 from tool.darknet2pytorch import Darknet
 
 
-def transform_to_onnx(cfgfile, weightfile, onnx_file_name, batch_size=1, opset_version=13, argmax=True):
+def transform_to_onnx(cfgfile, weightfile, onnx_file_name,
+                      batch_size=1, opset_version=13,
+                      argmax=True):
     model = Darknet(cfgfile, argmax=argmax)
 
     model.print_network()
     model.load_weights(weightfile)
     print('Loading weights from %s... Done!' % (weightfile))
+    dummy_input = torch.randn((1, 3, model.height, model.width), requires_grad=True)
+    dummy_output = model(dummy_input)
+
+    segmentation = isinstance(dummy_output, tuple)
 
     dynamic = False
     if batch_size <= 0:
         dynamic = True
 
     input_names = ["input"]
-    output_names = ['boxes', 'confs', "seg"]
+    if segmentation:
+        output_names = ['boxes', 'confs', "seg"]
+    else:
+        output_names = ['boxes', 'confs']
 
     if dynamic:
-        x = torch.randn((1, 3, model.height, model.width), requires_grad=True)
-        dynamic_axes = {"input": {0: "batch_size"}, "boxes": {0: "batch_size"}, "confs": {0: "batch_size"}}
+        dynamic_axes = {"input": {0: "batch_size"},
+                        "boxes": {0: "batch_size"},
+                        "confs": {0: "batch_size"}}
+        if segmentation:
+            dynamic_axes["seg"] = {0: "batch_size"}
         # Export the model
         print('Export the onnx model ...')
         torch.onnx.export(model,
-                          x,
+                          dummy_input,
                           onnx_file_name,
                           export_params=True,
                           opset_version=opset_version,
@@ -35,9 +47,8 @@ def transform_to_onnx(cfgfile, weightfile, onnx_file_name, batch_size=1, opset_v
         return onnx_file_name
 
     else:
-        x = torch.randn((batch_size, 3, model.height, model.width), requires_grad=True)
         torch.onnx.export(model,
-                          x,
+                          dummy_input,
                           onnx_file_name,
                           export_params=True,
                           opset_version=opset_version,
