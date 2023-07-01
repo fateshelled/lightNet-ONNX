@@ -1,9 +1,11 @@
+import os
+import time
 import onnxruntime as ort
 import numpy as np
 import cv2
-import time
 from tool.utils import post_processing, plot_boxes_cv2
 from tool.segment_utils import colorize, overlay
+
 
 CLASS_NAMES = [
     "car", "bus", "person",
@@ -13,7 +15,13 @@ CLASS_NAMES = [
 ]
 
 
-def main(model_path: str, video_path: str, conf_thresh: float, nms_thresh: float):
+def main(onnx_model_path: str, video_path: str, conf_thresh: float, nms_thresh: float):
+    if not os.path.exists(onnx_model_path):
+        raise ValueError(f"{onnx_model_path} not exist.")
+
+    if not os.path.exists(video_path):
+        raise ValueError(f"{video_path} not exist.")
+
     cap = cv2.VideoCapture(video_path)
 
     available_providers = ort.get_available_providers()
@@ -27,7 +35,7 @@ def main(model_path: str, video_path: str, conf_thresh: float, nms_thresh: float
     session_option.intra_op_num_threads = 0
 
     sess = ort.InferenceSession(
-        model_path,
+        onnx_model_path,
         sess_options=session_option,
         providers=providers)
 
@@ -41,7 +49,7 @@ def main(model_path: str, video_path: str, conf_thresh: float, nms_thresh: float
     output_shapes = [output.shape for output in sess.get_outputs()]
     output_types = [output.type for output in sess.get_outputs()]
     print("====Model Info====")
-    print(f"Model Path: {model_path}")
+    print(f"Model Path: {onnx_model_path}")
     print(f"Inputs:")
     print(f" - {input.name}, {input.shape}, {input.type}")
     print(f"Outputs:")
@@ -79,8 +87,9 @@ def main(model_path: str, video_path: str, conf_thresh: float, nms_thresh: float
             seg_img = outputs[2][0]
             colored_seg = colorize(seg_img)
             overlayed = overlay(img, colored_seg)
-
-        drawn = plot_boxes_cv2(img, boxes[0], class_names=CLASS_NAMES)
+            drawn = plot_boxes_cv2(overlayed, boxes[0], class_names=CLASS_NAMES)
+        else:
+            drawn = plot_boxes_cv2(img, boxes[0], class_names=CLASS_NAMES)
         dt_vis = time.perf_counter() - t_vis
 
         print(f"preprocessing:  {dt_pre:.3f}s")
@@ -89,12 +98,12 @@ def main(model_path: str, video_path: str, conf_thresh: float, nms_thresh: float
         print(f"visualization: {dt_vis:.3f}s")
         print("")
 
-        cv2.imshow("detection", drawn)
-        if segmentation:
-            cv2.imshow("segmentation", overlayed)
+        cv2.imshow("lightNet-ONNX", drawn)
         key = cv2.waitKey(10)
         if key == ord("q"):
             break
+    cv2.destroyAllWindows()
+    cap.release()
 
 
 if __name__ == "__main__":
