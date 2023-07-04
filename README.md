@@ -9,17 +9,17 @@ demo video is [MOT16-14](https://motchallenge.net/vis/MOT16-14)
 ### Convert to ONNX model
 - Pytorch
 - NumPy
-- onnx
+- ONNX
 - onnxsim
 
 ### ONNX demo
-- onnxruntime
+- ONNXRuntime
 - OpenCV
 - NumPy
 
 ### TensorRT demo
-- tensorrt
-- pycuda
+- TensorRT
+- PyCUDA
 - OpenCV
 - NumPy
 
