@@ -171,7 +171,7 @@ def load_class_names(namesfile):
     return class_names
 
 
-def post_processing(img, conf_thresh, nms_thresh, output):
+def post_processing(img, conf_thresh, nms_thresh, box_array, confs):
 
     # anchors = [12, 16, 19, 36, 40, 28, 36, 75, 76, 55, 72, 146, 142, 110, 192, 243, 459, 401]
     # num_anchors = 9
@@ -179,10 +179,10 @@ def post_processing(img, conf_thresh, nms_thresh, output):
     # strides = [8, 16, 32]
     # anchor_step = len(anchors) // num_anchors
 
-    # [batch, num, 1, 4]
-    box_array = output[0]
-    # [batch, num, num_classes]
-    confs = output[1]
+    # # [batch, num, 1, 4]
+    # box_array = output[0]
+    # # [batch, num, num_classes]
+    # confs = output[1]
 
     t1 = time.time()
 

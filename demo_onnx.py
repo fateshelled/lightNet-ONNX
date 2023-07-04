@@ -78,7 +78,7 @@ def main(onnx_model_path: str, video_path: str, conf_thresh: float, nms_thresh: 
 
         # Post-processing
         t_post = time.perf_counter()
-        boxes = post_processing(img, conf_thresh, nms_thresh, outputs[:2])
+        boxes = post_processing(img, conf_thresh, nms_thresh, outputs[0], outputs[1])
         dt_post = time.perf_counter() - t_post
 
         # Visualization
@@ -110,18 +110,31 @@ if __name__ == "__main__":
     from argparse import ArgumentParser
 
     parser = ArgumentParser()
-    parser.add_argument('--onnx_model_path', type=str,
+    parser.add_argument('-m', '--onnx_model_path',
+                        type=str,
                         # default="lightNet-BDD100K-1280x960.onnx",
                         # default="lightNet-BDD100K-1280x960-chPruning.onnx",
                         default="lightNet-BDD100K-det-semaseg-1280x960.onnx",
                         # default="lightNet-BDD100K-chPruning-det-semaseg-1280x960.onnx",
-                        help="Path to onnx file of lightNet")
-    parser.add_argument('--video_path', type=str,
+                        help="Onnx Model file path.")
+    parser.add_argument('-v', '--video_path',
+                        type=str,
                         default="/dev/video0",
                         # default="MOT16-14-raw.webm",
-                        help="Path to the video. Default /dev/video0")
-    parser.add_argument('--conf_thresh', type=float, default=0.45, help="confidence threshold. default 0.45")
-    parser.add_argument('--nms_thresh', type=float, default=0.30, help="nms threshold. default 0.30")
+                        help="input video path. Default /dev/video0")
+    parser.add_argument('-c', '--conf_thresh',
+                        type=float,
+                        default=0.45,
+                        help="confidence threshold. default 0.45")
+    parser.add_argument('-n', '--nms_thresh',
+                        type=float,
+                        default=0.30,
+                        help="nms threshold. default 0.30")
     args = parser.parse_args()
 
-    main(args.onnx_model_path, args.video_path, args.conf_thresh, args.nms_thresh)
+    main(
+        args.onnx_model_path,
+        args.video_path,
+        args.conf_thresh,
+        args.nms_thresh
+    )

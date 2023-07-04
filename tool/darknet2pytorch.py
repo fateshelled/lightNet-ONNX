@@ -431,17 +431,19 @@ class Darknet(nn.Module):
                 out_strides.append(prev_stride)
                 models.append(loss)
             elif block['type'] == 'yolo':
-                yolo_layer = YoloLayer()
                 anchors = block['anchors'].split(',')
+                anchors = [float(i) for i in anchors]
                 anchor_mask = block['mask'].split(',')
-                yolo_layer.anchor_mask = [int(i) for i in anchor_mask]
-                yolo_layer.anchors = [float(i) for i in anchors]
-                yolo_layer.num_classes = int(block['classes'])
-                self.num_classes = yolo_layer.num_classes
-                yolo_layer.num_anchors = int(block['num'])
-                yolo_layer.anchor_step = len(yolo_layer.anchors) // yolo_layer.num_anchors
-                yolo_layer.stride = prev_stride
-                yolo_layer.scale_x_y = float(block['scale_x_y'])
+                anchor_mask = [int(i) for i in anchor_mask]
+                self.num_classes = int(block['classes'])
+                num_anchors = int(block['num'])
+                stride = prev_stride
+                scale_x_y = float(block['scale_x_y'])
+
+                yolo_layer = YoloLayer(
+                    anchor_mask, self.num_classes, anchors, num_anchors, stride,
+                    scale_x_y=scale_x_y,
+                )
                 # yolo_layer.object_scale = float(block['object_scale'])
                 # yolo_layer.noobject_scale = float(block['noobject_scale'])
                 # yolo_layer.class_scale = float(block['class_scale'])

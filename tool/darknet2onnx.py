@@ -1,11 +1,13 @@
 import sys
 import torch
 from tool.darknet2pytorch import Darknet
+import onnx
+from onnxsim import simplify
 
 
 def transform_to_onnx(cfgfile, weightfile, onnx_file_name,
                       batch_size=1, opset_version=13,
-                      argmax=True):
+                      argmax=True, onnxsim=True):
     model = Darknet(cfgfile, argmax=argmax)
 
     model.print_network()
@@ -44,6 +46,15 @@ def transform_to_onnx(cfgfile, weightfile, onnx_file_name,
                           dynamic_axes=dynamic_axes)
 
         print('Onnx model exporting done')
+        if onnxsim:
+            onnx_model = onnx.load(onnx_file_name)
+            simplified, success = simplify(onnx_model)
+            if success:
+                onnx.save(simplified, onnx_file_name)
+                print("Success to simplify onnx model")
+            else:
+                print("Failed to simplify onnx model")
+
         return onnx_file_name
 
     else:
@@ -57,6 +68,14 @@ def transform_to_onnx(cfgfile, weightfile, onnx_file_name,
                           dynamic_axes=None)
 
         print('Onnx model exporting done')
+        if onnxsim:
+            onnx_model = onnx.load(onnx_file_name)
+            simplified, success = simplify(onnx_model)
+            if success:
+                onnx.save(simplified, onnx_file_name)
+                print("Success to simplify onnx model")
+            else:
+                print("Failed to simplify onnx model")
         return onnx_file_name
 
 

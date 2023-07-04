@@ -294,7 +294,8 @@ class YoloLayer(nn.Module):
     model_out: while inference,is post-processing inside or outside the model
         true:outside
     '''
-    def __init__(self, anchor_mask=[], num_classes=0, anchors=[], num_anchors=1, stride=32, model_out=False):
+    def __init__(self, anchor_mask=[], num_classes=0, anchors=[], num_anchors=1, stride=32, model_out=False,
+                 scale_x_y=1):
         super(YoloLayer, self).__init__()
         self.anchor_mask = anchor_mask
         self.num_classes = num_classes
@@ -308,17 +309,16 @@ class YoloLayer(nn.Module):
         self.thresh = 0.6
         self.stride = stride
         self.seen = 0
-        self.scale_x_y = 1
+        self.scale_x_y = scale_x_y
 
         self.model_out = model_out
+        self.masked_anchors = []
+        for m in self.anchor_mask:
+            self.masked_anchors += self.anchors[m * self.anchor_step:(m + 1) * self.anchor_step]
+        self.masked_anchors = [anchor / self.stride for anchor in self.masked_anchors]
 
     def forward(self, output, target=None):
         if self.training:
             return output
-        masked_anchors = []
-        for m in self.anchor_mask:
-            masked_anchors += self.anchors[m * self.anchor_step:(m + 1) * self.anchor_step]
-        masked_anchors = [anchor / self.stride for anchor in masked_anchors]
 
-        return yolo_forward_dynamic(output, self.thresh, self.num_classes, masked_anchors, len(self.anchor_mask),scale_x_y=self.scale_x_y)
-
+        return yolo_forward_dynamic(output, self.thresh, self.num_classes, self.masked_anchors, len(self.anchor_mask),scale_x_y=self.scale_x_y)
