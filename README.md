@@ -1,4 +1,6 @@
 # lightNet-ONNX
+ONNX and TensorRT demo for [lightNet-TRT](https://github.com/daniel89710/lightNet-TRT)
+
 ![demo](https://github.com/fateshelled/lightNet-ONNX/assets/53618876/b929891f-4be3-4e66-8933-4791e9e56bc3)
 
 demo video is [MOT16-14](https://motchallenge.net/vis/MOT16-14)
