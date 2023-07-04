@@ -3,8 +3,26 @@
 
 demo video is [MOT16-14](https://motchallenge.net/vis/MOT16-14)
 
+## Requirements
+### Convert to ONNX model
+- Pytorch
+- NumPy
+- onnx
+- onnxsim
+
+### ONNX demo
+- onnxruntime
+- OpenCV
+- NumPy
+
+### TensorRT demo
+- tensorrt
+- pycuda
+- OpenCV
+- NumPy
+
 ## Usage
-### Convert weights to onnx
+### Convert weights to ONNX model
 - Download cfg file and weights file from [lightNet-TRT](https://github.com/daniel89710/lightNet-TRT)
 - convert weights to onnx model by following script.
 ```bash
@@ -13,9 +31,21 @@ python convert2onnx.py lightNet-BDD100K-det-semaseg-1280x960.cfg \
                        lightNet-BDD100K-det-semaseg-1280x960.onnx 
 ```
 
-### Run
+### Convert ONNX model to TensorRT engine
 ```bash
-python onnx_demo.py --onnx_model_path lightNet-BDD100K-det-semaseg-1280x960.onnx \
+source convert2trt.bash lightNet-BDD100K-det-semaseg-1280x960.onnx \
+                        lightNet-BDD100K-det-semaseg-1280x960.engine
+```
+
+### Run ONNX Demo
+```bash
+python demo_onnx.py --onnx_model_path lightNet-BDD100K-det-semaseg-1280x960.onnx \
+                    --video_path {video or webcam path}
+```
+
+### Run TensorRT Demo
+```bash
+python demo_trt.py --engine_path lightNet-BDD100K-det-semaseg-1280x960.engine \
                     --video_path {video or webcam path}
 ```
 
